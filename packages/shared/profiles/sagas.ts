@@ -65,6 +65,7 @@ import { ParcelsWithAccess } from 'decentraland-ecs'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { store } from 'shared/store/isolatedStore'
 import { createFakeName } from './utils/fakeName'
+import { Wearable } from '@dcl/schemas'
 
 const toBuffer = require('blob-to-buffer')
 
@@ -373,6 +374,12 @@ function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
 
     yield localProfilesRepo.persist(identity.address, network, profile)
 
+    // TODO: inform the SDK that we changed the avatar wearables
+
+    // TODO: load and unload portable experiences from our wearables
+    //       do we have the wearables loaded at this point? should we wait for them lo load?
+    yield call(reconciliateWearablesAndPortableExperiences)
+
     yield put(saveProfileSuccess(userId, profile.version, profile))
 
     // only update profile on server if wallet is connected
@@ -387,6 +394,22 @@ function* handleSaveAvatar(saveAvatar: SaveProfileRequest) {
     yield put(saveProfileFailure(userId, 'unknown reason'))
   }
 }
+
+// this function is called when we trigger a saveProfile AND
+// this function is called when the wearable catalog loads
+export function* reconciliateWearablesAndPortableExperiences() {
+  // for every loaded portable experience belonging to wearables, search for those
+  // wearables that are no longer used and unloadPortableExperience(x)
+
+  // for every profile.wearable, if the wearable is loaded in catalog && it is a portable experience
+  // loadPortableExperience(wearable)
+}
+
+
+function wearableIsPortableExperience(wearable: Wearable){
+  
+}
+
 
 function* handleDeployProfile(deployProfileAction: DeployProfile) {
   const url: string = yield select(getUpdateProfileServer)

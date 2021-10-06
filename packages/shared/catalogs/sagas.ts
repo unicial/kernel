@@ -81,7 +81,7 @@ function* fetchWearablesFromCatalyst(filters: WearablesRequestFilters) {
   const catalystUrl = yield select(getCatalystServer)
   const client: CatalystClient = new CatalystClient(catalystUrl, 'EXPLORER')
 
-  const result: any[] = []
+  const result: PartialWearableV2[] = []
   if (filters.ownedByUser) {
     const COLLECTIONS_ALLOWED = PREVIEW || DEBUG || getTLD() !== 'org'
     if (WITH_FIXED_COLLECTIONS && COLLECTIONS_ALLOWED) {
