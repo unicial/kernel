@@ -1,5 +1,5 @@
 import { RarityEnum } from '../airdrops/interface'
-import { Wearable as SchemaWearable } from '@dcl/schemas'
+
 
 export type Catalog = PartialWearableV2[]
 
@@ -45,7 +45,21 @@ type UnpublishedBodyShapeRepresentation = {
   contents: string[]
 }
 
-export type WearableV2 = SchemaWearable & {
+// TODO: import { Wearable as SchemaWearable } from '@dcl/schemas'
+// TODO: export type WearableV2 = SchemaWearable & { baseUrl: string, baseUrlBundles: string }
+export type WearableV2 = {
+  id: string
+  rarity: string
+  i18n: { code: string; text: string }[]
+  thumbnail: string
+  description: string
+  data: {
+    category: string
+    tags: string[]
+    hides?: string[]
+    replaces?: string[]
+    representations: BodyShapeRepresentationV2[]
+  }
   baseUrl: string
   baseUrlBundles: string
 }

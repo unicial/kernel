@@ -65,7 +65,7 @@ import { ParcelsWithAccess } from 'decentraland-ecs'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { store } from 'shared/store/isolatedStore'
 import { createFakeName } from './utils/fakeName'
-import { Wearable } from '@dcl/schemas'
+import { WearableV2 } from 'shared/catalogs/types'
 
 const toBuffer = require('blob-to-buffer')
 
@@ -401,13 +401,15 @@ export function* reconciliateWearablesAndPortableExperiences() {
   // for every loaded portable experience belonging to wearables, search for those
   // wearables that are no longer used and unloadPortableExperience(x)
 
-  // for every profile.wearable, if the wearable is loaded in catalog && it is a portable experience
+  // for every profile.wearable, if the wearable is loaded in catalog && wearableIsPortableExperience(wearable)
   // loadPortableExperience(wearable)
 }
 
-
-function wearableIsPortableExperience(wearable: Wearable){
-  
+export function wearableIsPortableExperience(wearable: WearableV2){
+  return wearable.data.representations.some(representation => {
+    return representation.contents.some(mapping => mapping.key == 'game.js') && representation.contents.some(mapping => mapping.key == 'scene.json')
+  })
+  // TODO: getLoadablePortableExperience -> getLoadablePortableExperienceFromWearable(wearable: WearableV2)
 }
 
 
