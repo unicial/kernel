@@ -1,4 +1,16 @@
-import { AvatarShape, engine, Entity, Observable, Transform, EventManager } from '@dcl/legacy-ecs'
+import {
+  AvatarShape,
+  engine,
+  Entity,
+  Observable,
+  Transform,
+  EventManager,
+  BoxShape,
+  IEntity,
+  Material,
+  Color4,
+  Vector3
+} from '@dcl/legacy-ecs'
 import {
   AvatarMessage,
   AvatarMessageType,
@@ -15,6 +27,11 @@ import type { NewProfileForRenderer } from 'shared/profiles/transformations/prof
 export const avatarMessageObservable = new Observable<AvatarMessage>()
 
 const avatarMap = new Map<string, AvatarEntity>()
+const box = new BoxShape()
+const red = new Material()
+red.albedoColor = new Color4(1.0, 0.0, 0.0, 1.0)
+const green = new Material()
+green.albedoColor = new Color4(0.0, 1.0, 0.0, 1.0)
 
 export class AvatarEntity extends Entity {
   visible = true
@@ -22,9 +39,12 @@ export class AvatarEntity extends Entity {
   transform: Transform
   avatarShape!: AvatarShape
 
+  sub: IEntity
+
   constructor(uuid?: string, avatarShape = new AvatarShape()) {
     super(uuid)
     this.avatarShape = avatarShape
+    this.avatarShape.useDummyModel = true
 
     this.addComponentOrReplace(this.avatarShape)
     this.eventManager = new EventManager()
@@ -32,15 +52,24 @@ export class AvatarEntity extends Entity {
 
     // we need this component to filter the interpolator system
     this.transform = this.getComponentOrCreate(Transform)
+
+    this.sub = new Entity()
+    engine.addEntity(this.sub)
+    this.sub.addComponent(box)
+    this.sub.addComponent(this.transform)
+    this.sub.addComponentOrReplace(red)
   }
 
-  loadProfile(profile: NewProfileForRenderer) {
-    if (profile) {
+  loadProfile(profile: Pick<NewProfileForRenderer, 'avatar' | 'userId' | 'name'>) {
+    if (profile && profile.userId && profile.name && profile.avatar.bodyShape) {
+      this.sub.addComponentOrReplace(green)
       const { avatar } = profile
 
       const shape = this.avatarShape
       shape.id = profile.userId
       shape.name = profile.name
+
+      this.avatarShape.useDummyModel = false
 
       shape.bodyShape = avatar.bodyShape
       shape.wearables = avatar.wearables
@@ -51,6 +80,9 @@ export class AvatarEntity extends Entity {
         shape.expressionTriggerId = 'Idle'
         shape.expressionTriggerTimestamp = 0
       }
+    } else {
+      this.avatarShape.useDummyModel = true
+      this.sub.addComponentOrReplace(red)
     }
     this.updateVisibility()
   }
@@ -104,6 +136,7 @@ export class AvatarEntity extends Entity {
       engine.removeEntity(this)
       avatarMap.delete(this.uuid)
     }
+    if (this.sub.isAddedToEngine()) engine.removeEntity(this.sub)
   }
 
   private updateVisibility() {
@@ -111,6 +144,7 @@ export class AvatarEntity extends Entity {
       this.remove()
     } else if (this.visible && !this.isAddedToEngine()) {
       engine.addEntity(this)
+      engine.addEntity(this.sub)
     }
   }
 }
@@ -137,6 +171,7 @@ function handleUserData({ uuid, data, profile }: ReceiveUserDataMessage): void {
   const avatar = ensureAvatar(uuid)
   avatar.setUserData(data)
   avatar.loadProfile(profile)
+  avatar.setVisible(data.visible ?? true)
 }
 
 function handleUserExpression({ uuid, expressionId, timestamp }: ReceiveUserExpressionMessage): void {
@@ -158,7 +193,10 @@ function handleUserTalkingUpdate({ uuid, talking }: ReceiveUserTalkingMessage): 
 function handleUserRemoved({ uuid }: UserRemovedMessage): void {
   const avatar = avatarMap.get(uuid)
   if (avatar) {
-    avatar.remove()
+    avatar.transform.translate(new Vector3(0, 100, 0))
+    setTimeout(() => {
+      avatar.remove()
+    }, 2000)
   }
 }
 
