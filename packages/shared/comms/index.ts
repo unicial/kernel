@@ -62,7 +62,8 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
 
   let connection: RoomConnection
 
-  const DEFAULT_PROTOCOL = 'v3'
+  const DEFAULT_PROTOCOL = 'v2'
+  realm.protocol = 'v3' // TODO
   const protocol = realm.protocol ?? DEFAULT_PROTOCOL
 
   switch (protocol) {
@@ -154,14 +155,8 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
     }
     case 'v3': {
       // const { wsUrl } = resolveCommsV3Urls(realm)!
-      const wsUrl = 'https://peer-testing-2.decentraland.org/bff/ws-bff'
-
-      const url = new URL(wsUrl)
-      const qs = new URLSearchParams({
-        identity: btoa(identity.address)
-      })
-      url.search = qs.toString()
-      const finalUrl = url.toString()
+      const wsUrl = 'wss://peer-testing-2.decentraland.org/bff/ws-bff'
+      realm.hostname = 'https://peer-testing-2.decentraland.org'
 
       const bffConfig: BFFConfig = {
         getIdentity: () => getIdentity() as AuthIdentity,
@@ -172,8 +167,8 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
         }
       }
 
-      commsLogger.log('Using BFF service: ', finalUrl)
-      const bff = new BFFConnection(finalUrl, bffConfig)
+      commsLogger.log('Using BFF service: ', wsUrl)
+      const bff = new BFFConnection(wsUrl, bffConfig)
       connection = new V3InstanceConnection(bff)
       break
     }

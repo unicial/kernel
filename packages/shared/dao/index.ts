@@ -147,4 +147,4 @@ export async function changeRealmObject(realm: Realm, forceChange: boolean = fal
   return
 }
 
-;(globalThis as any).changeRealm = changeRealm
+; (globalThis as any).changeRealm = changeRealm
