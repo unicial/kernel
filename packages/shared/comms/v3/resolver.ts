@@ -24,8 +24,7 @@ export function resolveCommsV3Urls(realm: Realm): { pingUrl: string; wsUrl: stri
   if (realm.hostname === 'local') {
     server = 'http://127.0.0.1:5000'
   } else if (realm.hostname === 'remote') {
-    // server = 'https://explorer-bff.decentraland.io'
-    server = 'https://peer-testing-2.decentraland.org/bff'
+    server = 'https://explorer-bff.decentraland.io'
   } else {
     server = realm.hostname.match(/:\/\//) ? realm.hostname : 'https://' + realm.hostname
   }

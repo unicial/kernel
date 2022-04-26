@@ -154,7 +154,8 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
       break
     }
     case 'v3': {
-      const { wsUrl } = resolveCommsV3Urls(realm)!
+      // const { wsUrl } = resolveCommsV3Urls(realm)!
+      const wsUrl = 'https://peer-testing-2.decentraland.org/bff/ws-bff'
 
       const url = new URL(wsUrl)
       const qs = new URLSearchParams({
@@ -172,6 +173,7 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
         }
       }
 
+      commsLogger.log('Using BFF service: ', finalUrl)
       const bff = new BFFConnection(finalUrl, bffConfig)
       connection = new V3InstanceConnection(bff)
       break
