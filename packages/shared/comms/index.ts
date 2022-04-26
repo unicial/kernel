@@ -63,7 +63,7 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
 
   let connection: RoomConnection
 
-  const DEFAULT_PROTOCOL = 'v2'
+  const DEFAULT_PROTOCOL = 'v3'
   const protocol = realm.protocol ?? DEFAULT_PROTOCOL
 
   switch (protocol) {
