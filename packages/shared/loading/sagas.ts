@@ -2,18 +2,21 @@ import { AnyAction } from 'redux'
 import { fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 
 import { PARCEL_LOADING_STARTED, RENDERER_INITIALIZED_CORRECTLY } from 'shared/renderer/types'
-import { ChangeLoginStateAction, CHANGE_LOGIN_STAGE } from 'shared/session/actions'
+import { AUTHENTICATE, ChangeLoginStateAction, CHANGE_LOGIN_STAGE, SIGNUP_SET_IS_SIGNUP } from 'shared/session/actions'
 import { trackEvent } from '../analytics'
 import { lastPlayerPosition } from '../world/positionThings'
 
 import {
+  informPendingScenes,
   PENDING_SCENES,
   SceneFail,
   SceneLoad,
+  SCENE_CHANGED,
   SCENE_FAIL,
   SCENE_LOAD,
   SCENE_START,
   updateLoadingScreen,
+  UPDATE_STATUS_MESSAGE
 } from './actions'
 import {
   metricsUnityClientLoaded,
@@ -22,7 +25,8 @@ import {
   RENDERING_ACTIVATED,
   RENDERING_DEACTIVATED,
   RENDERING_BACKGROUND,
-  RENDERING_FOREGROUND
+  RENDERING_FOREGROUND,
+  TELEPORT_TRIGGERED
 } from './types'
 import { getCurrentUserId } from 'shared/session/selectors'
 import { LoginState } from '@dcl/kernel-interface'
@@ -32,19 +36,25 @@ import { onLoginCompleted } from 'shared/session/sagas'
 import { getResourcesURL } from 'shared/location'
 import { getCatalystServer, getFetchContentServer, getSelectedNetwork } from 'shared/dao/selectors'
 import { getAssetBundlesBaseUrl } from 'config'
+import { loadedSceneWorkers } from 'shared/world/parcelSceneManager'
+import { SceneWorkerReadyState } from 'shared/world/SceneWorker'
 
 // The following actions may change the status of the loginVisible
 const ACTIONS_FOR_LOADING = [
-  PARCEL_LOADING_STARTED,
-  SCENE_LOAD,
-  SCENE_FAIL,
+  AUTHENTICATE,
   CHANGE_LOGIN_STAGE,
+  PARCEL_LOADING_STARTED,
+  PENDING_SCENES,
   RENDERER_INITIALIZED_CORRECTLY,
-  RENDERING_BACKGROUND,
-  RENDERING_FOREGROUND,
   RENDERING_ACTIVATED,
+  RENDERING_BACKGROUND,
   RENDERING_DEACTIVATED,
-  PENDING_SCENES
+  RENDERING_FOREGROUND,
+  SCENE_FAIL,
+  SCENE_LOAD,
+  SIGNUP_SET_IS_SIGNUP,
+  TELEPORT_TRIGGERED,
+  UPDATE_STATUS_MESSAGE,
 ]
 
 export function* loadingSaga() {
@@ -58,6 +68,7 @@ export function* loadingSaga() {
     yield put(updateLoadingScreen())
   })
 
+  yield takeLatest([SCENE_FAIL, SCENE_LOAD, SCENE_START, SCENE_CHANGED], handleReportPendingScenes)
 }
 
 function* reportFailedScene(action: SceneFail) {
@@ -136,4 +147,28 @@ function* initialSceneLoading() {
   yield call(onLoginCompleted)
   yield call(waitForSceneLoads)
   yield put(experienceStarted())
+}
+
+/**
+ * Reports the number of loading parcel scenes to unity to handle the loading states
+ */
+function* handleReportPendingScenes() {
+  const pendingScenes = new Set<string>()
+
+  let countableScenes = 0
+  for (const [sceneId, sceneWorker] of loadedSceneWorkers) {
+    // avatar scene should not be counted here
+    const shouldBeCounted = !sceneWorker.isPersistent()
+
+    const isPending = (sceneWorker.ready & SceneWorkerReadyState.STARTED) === 0
+    const failedLoading = (sceneWorker.ready & SceneWorkerReadyState.LOADING_FAILED) !== 0
+    if (shouldBeCounted) {
+      countableScenes++
+    }
+    if (shouldBeCounted && isPending && !failedLoading) {
+      pendingScenes.add(sceneId)
+    }
+  }
+
+  yield put(informPendingScenes(pendingScenes.size, countableScenes))
 }
