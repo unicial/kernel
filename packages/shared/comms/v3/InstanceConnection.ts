@@ -8,7 +8,8 @@ import {
   PositionData,
   ProfileData,
   DataHeader,
-  SceneData
+  SceneData,
+  VoiceData
 } from './proto/comms_pb'
 import { Position } from '../../comms/interface/utils'
 import { BFFConnection, TopicData } from './BFFConnection'
@@ -71,7 +72,6 @@ export class InstanceConnection implements RoomConnection {
   }
 
   async sendParcelUpdateMessage(_: Position, _newPosition: Position) {
-    // TODO
   }
 
   async sendProfileMessage(_: Position, __: string, profileType: ProfileType, version: number) {
@@ -144,11 +144,11 @@ export class InstanceConnection implements RoomConnection {
   }
 
   async sendVoiceMessage(_currentPosition: Position, frame: EncodedFrame): Promise<void> {
-    this.events.emit('voiceMessage', {
-      sender: '0x123',
-      time: new Date().getTime(),
-      data: frame
-    })
+    const d = new VoiceData()
+    d.setEncodedSamples(frame.encoded)
+    d.setIndex(frame.index)
+
+    return this.transport.send(d, true)
   }
 
   private handleTopicMessage(message: TopicData) {
@@ -221,6 +221,19 @@ export class InstanceConnection implements RoomConnection {
           data: {
             id: chatData.getMessageId(),
             text: chatData.getText()
+          }
+        })
+        break
+      }
+      case Category.VOICE: {
+        const voiceData = VoiceData.deserializeBinary(data)
+
+        this.events.emit('voiceMessage', {
+          sender: peer,
+          time: new Date().getTime(),
+          data: {
+            encoded: voiceData.getEncodedSamples_asU8(),
+            index: voiceData.getIndex()
           }
         })
         break
