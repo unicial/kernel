@@ -145,6 +145,7 @@ export class InstanceConnection implements RoomConnection {
 
   async sendVoiceMessage(_currentPosition: Position, frame: EncodedFrame): Promise<void> {
     const d = new VoiceData()
+    d.setCategory(Category.VOICE)
     d.setEncodedSamples(frame.encoded)
     d.setIndex(frame.index)
 
