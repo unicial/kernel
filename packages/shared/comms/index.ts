@@ -18,7 +18,7 @@ import { Realm } from 'shared/dao/types'
 import { resolveCommsV3Urls } from './v3/resolver'
 import { BFFConfig, BFFConnection } from './v4/BFFConnection'
 import { resolveCommsV4Url } from './v4/resolver'
-import { InstanceConnection as V3InstanceConnection } from './v4/InstanceConnection'
+import { InstanceConnection as V4InstanceConnection } from './v4/InstanceConnection'
 import { removePeerByUUID, removeMissingPeers } from './peers'
 import { lastPlayerPositionReport } from 'shared/world/positionThings'
 import { ProfileType } from 'shared/profiles/types'
@@ -183,7 +183,7 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
 
       commsLogger.log('Using BFF service: ', wsUrl)
       const bff = new BFFConnection(wsUrl, bffConfig)
-      connection = new V3InstanceConnection(bff)
+      connection = new V4InstanceConnection(bff)
       break
     }
     default: {
