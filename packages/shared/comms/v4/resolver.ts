@@ -19,8 +19,6 @@ export function resolveCommsV4Url(realm: Realm): string | undefined {
     return url.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://')
   }
 
-  console.log("REALM", realm)
-
   let server: string
   if (realm.hostname === 'local') {
     server = 'http://127.0.0.1:5002/ws-bff'
