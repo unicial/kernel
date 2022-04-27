@@ -166,7 +166,7 @@ export class InstanceConnection implements RoomConnection {
       case Category.SCENE_MESSAGE: {
         const sceneData = SceneData.deserializeBinary(message.data)
 
-        this.events.emit('chatMessage', {
+        this.events.emit('sceneMessageBus', {
           sender: message.peerId,
           time: sceneData.getTime(),
           data: {
