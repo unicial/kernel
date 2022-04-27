@@ -284,17 +284,18 @@ export class InstanceConnection implements RoomConnection {
   }
 
   private async changeTransport(transport: Transport): Promise<void> {
-    if (this.transport) {
-      this.transport.onMessageObservable.clear()
-      this.transport.onDisconnectObservable.clear()
-      await this.transport.disconnect()
-    }
+    const oldTransport = this.transport
+
+    await transport.connect()
+    transport.onMessageObservable.add(this.handleTransportMessage.bind(this))
+    transport.onDisconnectObservable.add(this.disconnect.bind(this))
     this.transport = transport
 
-    this.transport.onMessageObservable.add(this.handleTransportMessage.bind(this))
-    this.transport.onDisconnectObservable.add(this.disconnect.bind(this))
-
-    return this.transport.connect()
+    if (oldTransport) {
+      oldTransport.onMessageObservable.clear()
+      oldTransport.onDisconnectObservable.clear()
+      await oldTransport.disconnect()
+    }
   }
 
 }

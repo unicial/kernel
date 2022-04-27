@@ -13,7 +13,7 @@ export class WsTransport implements Transport {
 
   private ws: WebSocket | null = null
 
-  constructor(public url: string) {}
+  constructor(public url: string) { }
 
   async connect(): Promise<void> {
     await this.connectWS()

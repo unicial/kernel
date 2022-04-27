@@ -15,13 +15,15 @@ import { commsLogger, CommsContext } from './context'
 import { getCurrentIdentity } from 'shared/session/selectors'
 import { getCommsContext } from './selectors'
 import { Realm } from 'shared/dao/types'
-import { BFFConfig, BFFConnection } from './v3/BFFConnection'
-import { InstanceConnection as V3InstanceConnection } from './v3/InstanceConnection'
+import { resolveCommsV3Urls } from './v3/resolver'
+import { BFFConfig, BFFConnection } from './v4/BFFConnection'
+import { resolveCommsV4Url } from './v4/resolver'
+import { InstanceConnection as V3InstanceConnection } from './v4/InstanceConnection'
 import { removePeerByUUID, removeMissingPeers } from './peers'
 import { lastPlayerPositionReport } from 'shared/world/positionThings'
 import { ProfileType } from 'shared/profiles/types'
 
-export type CommsVersion = 'v1' | 'v2' | 'v3'
+export type CommsVersion = 'v1' | 'v2' | 'v3' | 'v4'
 export type CommsMode = CommsV1Mode | CommsV2Mode
 export type CommsV1Mode = 'local' | 'remote'
 export type CommsV2Mode = 'p2p' | 'server'
@@ -63,7 +65,6 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
   let connection: RoomConnection
 
   const DEFAULT_PROTOCOL = 'v2'
-  realm.protocol = 'v3' // TODO
   const protocol = realm.protocol ?? DEFAULT_PROTOCOL
 
   switch (protocol) {
@@ -154,9 +155,22 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
       break
     }
     case 'v3': {
-      // const { wsUrl } = resolveCommsV3Urls(realm)!
-      const wsUrl = 'wss://peer-testing-2.decentraland.org/bff/ws-bff'
-      realm.hostname = 'https://peer-testing-2.decentraland.org'
+      const { wsUrl } = resolveCommsV3Urls(realm)!
+
+      const url = new URL(wsUrl)
+      const qs = new URLSearchParams({
+        identity: btoa(identity.address)
+      })
+      url.search = qs.toString()
+      const finalUrl = url.toString()
+      commsLogger.log('Using WebSocket comms: ' + finalUrl)
+      const commsBroker = new CliBrokerConnection(finalUrl)
+      connection = new BrokerWorldInstanceConnection(commsBroker)
+
+      break
+    }
+    case 'v4': {
+      const wsUrl = resolveCommsV4Url(realm)!
 
       const bffConfig: BFFConfig = {
         getIdentity: () => getIdentity() as AuthIdentity,
