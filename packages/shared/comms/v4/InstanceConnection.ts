@@ -29,7 +29,7 @@ import { Avatar } from '@dcl/schemas'
 export class InstanceConnection implements RoomConnection {
   events = mitt<CommsEvents>()
 
-  private logger = createLogger('Commsv3 connection: ')
+  private logger = createLogger('CommsV4: ')
   private transport: Transport = new DummyTransport()
 
   constructor(private bff: BFFConnection) {
@@ -39,7 +39,7 @@ export class InstanceConnection implements RoomConnection {
 
   async connect(): Promise<void> {
     this.bff.onIslandChangeObservable.add(async (islandConnStr) => {
-      this.logger.error(`Got island change message: ${islandConnStr}`)
+      this.logger.info(`Got island change message: ${islandConnStr}`)
       let transport: Transport | null = null
       if (islandConnStr.startsWith('ws-room:')) {
         transport = new WsTransport(islandConnStr.substring("ws-room:".length))

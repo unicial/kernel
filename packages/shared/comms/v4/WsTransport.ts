@@ -100,7 +100,7 @@ export class WsTransport implements Transport {
           break
         }
 
-        const userId = atob(dataMessage.getIdentity_asB64())
+        const userId = dataMessage.getIdentity()
         this.aliases[dataMessage.getFromAlias()] = userId
 
         const body = dataMessage.getBody() as any
