@@ -25,6 +25,7 @@ export async function resolveCommsConnectionString(
     const protocol = realmString.substring(0, i)
     const secondPart = realmString.substring(i + 1)
 
+
     if (!secondPart) return undefined
 
     for (const candidate of candidates) {

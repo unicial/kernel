@@ -12,7 +12,7 @@ export function urlWithProtocol(url: string) {
   return normalizeUrl(url)
 }
 
-export function resolveCommsV4Url(realm: Realm): string | undefined {
+export function resolveCommsV4Urls(realm: Realm): { pingUrl: string; wsUrl: string } | undefined {
   if (realm.protocol !== 'v4') return
 
   function httpToWs(url: string) {
@@ -21,13 +21,14 @@ export function resolveCommsV4Url(realm: Realm): string | undefined {
 
   let server: string
   if (realm.hostname === 'local') {
-    server = 'http://127.0.0.1:5002/ws-bff'
+    server = 'http://127.0.0.1:5002'
   } else if (realm.hostname === 'remote') {
-    server = 'https://explorer-bff.decentraland.io/ws-bff'
+    server = 'https://explorer-bff.decentraland.io'
   } else {
-    server = realm.hostname.match(/:\/\//) ? realm.hostname : 'https://' + realm.hostname
-    server = new URL('bff/ws-bff', server).toString()
+    server = realm.hostname.match(/:\/\//) ? realm.hostname : 'https://' + realm.hostname + '/bff'
   }
 
-  return httpToWs(server)
+  const wsUrl = httpToWs(`${server}/ws-bff`)
+  const pingUrl = `${server}/status`
+  return { pingUrl, wsUrl }
 }

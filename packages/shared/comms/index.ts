@@ -17,7 +17,7 @@ import { getCommsContext } from './selectors'
 import { Realm } from 'shared/dao/types'
 import { resolveCommsV3Urls } from './v3/resolver'
 import { BFFConfig, BFFConnection } from './v4/BFFConnection'
-import { resolveCommsV4Url } from './v4/resolver'
+import { resolveCommsV4Urls } from './v4/resolver'
 import { InstanceConnection as V4InstanceConnection } from './v4/InstanceConnection'
 import { removePeerByUUID, removeMissingPeers } from './peers'
 import { lastPlayerPositionReport } from 'shared/world/positionThings'
@@ -170,7 +170,7 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
       break
     }
     case 'v4': {
-      const wsUrl = resolveCommsV4Url(realm)!
+      const { wsUrl } = resolveCommsV4Urls(realm)!
 
       const bffConfig: BFFConfig = {
         getIdentity: () => getIdentity() as AuthIdentity,
