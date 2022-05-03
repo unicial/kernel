@@ -2,8 +2,8 @@ import { Realm } from 'shared/dao/types'
 import { isFeatureToggleEnabled } from 'shared/selectors'
 import { SceneFeatureToggles } from 'shared/types'
 import { lastPlayerScene } from 'shared/world/sceneState'
-import { VoiceCommunicator } from 'voice-chat-codec/VoiceCommunicator'
-import { CommsContext } from './context'
+import type { VoiceCommunicator } from 'voice-chat-codec/VoiceCommunicator'
+import type { CommsContext } from './context'
 import { RootCommsState } from './types'
 
 export const isVoiceChatRecording = (store: RootCommsState) => store.comms.voiceChatRecording

@@ -30,11 +30,7 @@ import {
   UpdateUserStatusMessage
 } from 'shared/types'
 import { Realm } from 'shared/dao/types'
-import {
-  lastPlayerPosition,
-  lastPlayerPositionReport,
-  parcelObservable,
-} from 'shared/world/positionThings'
+import { lastPlayerPosition, lastPlayerPositionReport, parcelObservable } from 'shared/world/positionThings'
 import { waitForRendererInstance } from 'shared/renderer/sagas'
 import { ADDED_PROFILE_TO_CATALOG } from 'shared/profiles/actions'
 import { isAddedToCatalog, getProfile } from 'shared/profiles/selectors'
@@ -84,8 +80,9 @@ export function* friendsSaga() {
 
 function* initializeFriendsSaga() {
   const identity: ExplorerIdentity = yield select(getCurrentIdentity)
+  const isGuest = identity.hasConnectedWeb3
 
-  if (identity.hasConnectedWeb3) {
+  if (!isGuest) {
     yield call(waitForRealmInitialized)
 
     try {

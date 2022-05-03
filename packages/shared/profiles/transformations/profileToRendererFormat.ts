@@ -1,40 +1,16 @@
-import { ParcelsWithAccess, ProfileForRenderer } from '@dcl/legacy-ecs'
+import { ParcelsWithAccess } from '@dcl/legacy-ecs'
 import { convertToRGBObject } from './convertToRGBObject'
 import { isURL } from 'atomicHelpers/isURL'
-import { Avatar, Snapshots } from '@dcl/schemas'
+import { Avatar, IPFSv2, Snapshots } from '@dcl/schemas'
 import { backupProfile } from '../generateRandomUserProfile'
 import { genericAvatarSnapshots } from 'config'
 import { calculateDisplayName } from './processServerProfile'
-
-export type NewProfileForRenderer = {
-  userId: string
-  ethAddress: string
-  name: string
-  // @deprecated
-  email: string
-  parcelsWithAccess: ProfileForRenderer['parcelsWithAccess']
-  snapshots: Snapshots
-  blocked: string[]
-  muted: string[]
-  tutorialStep: number
-  hasConnectedWeb3: boolean
-  hasClaimedName: boolean
-  avatar: ProfileForRenderer['avatar']
-
-  // TODO evaluate usage of the following
-  version: number
-  description: string
-  created_at: number
-  updated_at: number
-  inventory: string[]
-  tutorialFlagsMask: number
-}
+import { NewProfileForRenderer } from './types'
 
 export function profileToRendererFormat(
   profile: Partial<Avatar>,
   options: {
     address?: string
-    hasConnectedWeb3?: boolean
 
     // TODO: there is no explaination why the profile has the parcels of Builder. Remove it from here
     parcels?: ParcelsWithAccess
@@ -55,11 +31,11 @@ export function profileToRendererFormat(
     updated_at: 0,
     // @deprecated
     email: '',
-    hasConnectedWeb3: options.hasConnectedWeb3 || false,
+    hasConnectedWeb3: stage.hasConnectedWeb3 || false,
     hasClaimedName: stage.hasClaimedName ?? false,
     tutorialFlagsMask: 0,
     tutorialStep: stage.tutorialStep || 0,
-    snapshots: prepareSnapshots(profile.avatar!.snapshots, profile.userId!),
+    snapshots: prepareSnapshots(profile.avatar!.snapshots),
     avatar: {
       wearables: profile.avatar?.wearables || [],
       bodyShape: profile.avatar?.bodyShape || '',
@@ -72,13 +48,19 @@ export function profileToRendererFormat(
 }
 
 // Ensure all snapshots are URLs
-function prepareSnapshots({ face256, body }: Snapshots, userId: string): NewProfileForRenderer['snapshots'] {
+function prepareSnapshots({ face256, body }: Snapshots): NewProfileForRenderer['snapshots'] {
   // TODO: move this logic to unity-renderer
   function prepare(value: string) {
     if (value === null || value === undefined) {
       return null
     }
-    if (value === '' || isURL(value) || value.startsWith('/images')) {
+    if (
+      value === '' ||
+      isURL(value) ||
+      value.startsWith('/images') ||
+      value.startsWith('Qm') ||
+      IPFSv2.validate(value)
+    ) {
       return value
     }
 
