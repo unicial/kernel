@@ -18,7 +18,7 @@ import { Realm } from 'shared/dao/types'
 import { resolveCommsV3Urls } from './v3/resolver'
 import { BFFConfig, BFFConnection } from './v4/BFFConnection'
 import { resolveCommsV4Urls } from './v4/resolver'
-import { InstanceConnection as V4InstanceConnection } from './v4/InstanceConnection'
+import { InstanceConnectionWithLighthouse as V4InstanceConnection } from './v4/InstanceConnectionWithLighthouse'
 import { removePeerByUUID, removeMissingPeers } from './peers'
 import { lastPlayerPositionReport } from 'shared/world/positionThings'
 import { ProfileType } from 'shared/profiles/types'
@@ -170,6 +170,72 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
       break
     }
     case 'v4': {
+      // TODO Refactor DRY
+      await ensureMetaConfigurationInitialized()
+
+      const lighthouseUrl = getCommsServer(realm.hostname)
+      const commsConfig = getCommsConfig(store.getState())
+
+      const peerConfig: LighthouseConnectionConfig = {
+        connectionConfig: {
+          iceServers: commConfigurations.defaultIceServers
+        },
+        authHandler: async (msg: string) => {
+          try {
+            return Authenticator.signPayload(getIdentity() as AuthIdentity, msg)
+          } catch (e) {
+            commsLogger.info(`error while trying to sign message from lighthouse '${msg}'`)
+          }
+          // if any error occurs
+          return getIdentity()
+        },
+        logLevel: 'NONE',
+        targetConnections: commsConfig.targetConnections ?? 4,
+        maxConnections: commsConfig.maxConnections ?? 6,
+        positionConfig: {
+          selfPosition: () => {
+            if (lastPlayerPositionReport) {
+              const { x, y, z } = lastPlayerPositionReport.position
+              return [x, y, z]
+            }
+          },
+          maxConnectionDistance: 4,
+          nearbyPeersDistance: 5,
+          disconnectDistance: 5
+        },
+        eventsHandler: {
+          onIslandChange: (island: string | undefined, peers: MinPeerData[]) => {
+            store.dispatch(setCommsIsland(island))
+            removeMissingPeers(peers)
+          },
+          onPeerLeftIsland: (peerId: string) => {
+            commsLogger.info('Removing peer that left an island', peerId)
+            removePeerByUUID(peerId)
+          }
+        },
+        preferedIslandId: PREFERED_ISLAND ?? ''
+      }
+
+      if (!commsConfig.relaySuspensionDisabled) {
+        peerConfig.relaySuspensionConfig = {
+          relaySuspensionInterval: commsConfig.relaySuspensionInterval ?? 750,
+          relaySuspensionDuration: commsConfig.relaySuspensionDuration ?? 5000
+        }
+      }
+
+      commsLogger.log('Using Remote lighthouse service: ', lighthouseUrl)
+
+      const statusHandler = (status) => {
+        commsLogger.log('Lighthouse status: ', status)
+        switch (status.status) {
+          case 'realm-full':
+          case 'reconnection-error':
+          case 'id-taken':
+            connection.disconnect().catch(commsLogger.error)
+            break
+        }
+      }
+
       const { wsUrl } = resolveCommsV4Urls(realm)!
 
       const bffConfig: BFFConfig = {
@@ -183,7 +249,7 @@ export async function connectComms(realm: Realm): Promise<CommsContext | null> {
 
       commsLogger.log('Using BFF service: ', wsUrl)
       const bff = new BFFConnection(wsUrl, bffConfig)
-      connection = new V4InstanceConnection(bff)
+      connection = new V4InstanceConnection(bff, lighthouseUrl, peerConfig, statusHandler)
       break
     }
     default: {

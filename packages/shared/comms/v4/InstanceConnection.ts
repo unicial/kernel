@@ -30,7 +30,7 @@ export class InstanceConnection implements RoomConnection {
   events = mitt<CommsEvents>()
 
   private logger = createLogger('CommsV4: ')
-  private transport: Transport = new DummyTransport()
+  protected transport: Transport = new DummyTransport()
 
   constructor(private bff: BFFConnection) {
     this.bff.onTopicMessageObservable.add(this.handleTopicMessage.bind(this))
@@ -40,13 +40,7 @@ export class InstanceConnection implements RoomConnection {
   async connect(): Promise<void> {
     this.bff.onIslandChangeObservable.add(async (islandConnStr) => {
       this.logger.info(`Got island change message: ${islandConnStr}`)
-      let transport: Transport | null = null
-      if (islandConnStr.startsWith('ws-room:')) {
-        transport = new WsTransport(islandConnStr.substring("ws-room:".length))
-      } else if (islandConnStr.startsWith('livekit:')) {
-        transport = new LivekitTransport(islandConnStr.substring("livekit:".length))
-      }
-
+      const transport = this.createTransport(islandConnStr)
       if (!transport) {
         this.logger.error(`Invalid islandConnStr ${islandConnStr}`)
         return
@@ -152,7 +146,7 @@ export class InstanceConnection implements RoomConnection {
     return this.transport.send(d, true)
   }
 
-  private handleTopicMessage(message: TopicData) {
+  protected handleTopicMessage(message: TopicData) {
     let dataHeader: DataHeader
     try {
       dataHeader = DataHeader.deserializeBinary(message.data)
@@ -183,7 +177,7 @@ export class InstanceConnection implements RoomConnection {
     }
   }
 
-  private handleTransportMessage({ peer, data }: TransportMessage) {
+  protected handleTransportMessage({ peer, data }: TransportMessage) {
     let dataHeader: DataHeader
     try {
       dataHeader = DataHeader.deserializeBinary(data)
@@ -283,7 +277,7 @@ export class InstanceConnection implements RoomConnection {
     }
   }
 
-  private async changeTransport(transport: Transport): Promise<void> {
+  protected async changeTransport(transport: Transport): Promise<void> {
     const oldTransport = this.transport
 
     await transport.connect()
@@ -298,4 +292,13 @@ export class InstanceConnection implements RoomConnection {
     }
   }
 
+  protected createTransport(islandConnStr: string): Transport | null {
+    let transport: Transport | null = null
+    if (islandConnStr.startsWith('ws-room:')) {
+      transport = new WsTransport(islandConnStr.substring('ws-room:'.length))
+    } else if (islandConnStr.startsWith('livekit:')) {
+      transport = new LivekitTransport(islandConnStr.substring('livekit:'.length))
+    }
+    return transport
+  }
 }
