@@ -207,6 +207,7 @@ export function getTLD() {
   return 'org'
 }
 
+export const WITH_FIXED_ITEMS = (qs.get('WITH_ITEMS') && ensureSingleString(qs.get('WITH_ITEMS'))) || ''
 export const WITH_FIXED_COLLECTIONS =
   (qs.get('WITH_COLLECTIONS') && ensureSingleString(qs.get('WITH_COLLECTIONS'))) || ''
 export const ENABLE_EMPTY_SCENES = !location.search.includes('DISABLE_EMPTY_SCENES')
@@ -225,14 +226,12 @@ function getDefaultAssetBundlesBaseUrl(network: ETHEREUM_NETWORK): string {
 
 export function getServerConfigurations(network: ETHEREUM_NETWORK) {
   const metaConfigBaseUrl = META_CONFIG_URL || `https://config.unicial.org/explorer.json`
-  const metaFeatureFlagsBaseUrl = `https://config.unicial.org/feature-flag/explorer.json`
 
   const questsUrl =
     ensureSingleString(qs.get('QUESTS_SERVER_URL')) ?? `https://quests-api.decentraland.${network ? 'org' : 'io'}`
 
   return {
     explorerConfiguration: `${metaConfigBaseUrl}?t=${new Date().getTime()}`,
-    explorerFeatureFlags: `${metaFeatureFlagsBaseUrl}?t=${new Date().getTime()}`,
     questsUrl
   }
 }
