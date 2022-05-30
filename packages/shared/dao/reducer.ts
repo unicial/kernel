@@ -26,7 +26,7 @@ export function daoReducer(state?: DaoState, action?: AnyAction): DaoState {
     case SELECT_NETWORK:
       return {
         ...state,
-        network: (action as SelectNetworkAction).payload
+        network: ETHEREUM_NETWORK.MAINNET
       }
     case SET_CATALYST_CANDIDATES:
       return {
