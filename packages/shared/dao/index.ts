@@ -1,7 +1,6 @@
 import defaultLogger from '../logger'
 import { Realm, ServerConnectionStatus, HealthStatus, Candidate } from './types'
 import { getAllCatalystCandidates } from './selectors'
-import { fetchCatalystNodesFromDAO } from 'shared/web3'
 import { CatalystNode } from '../types'
 import { PIN_CATALYST } from 'config'
 import { store } from 'shared/store/isolatedStore'
@@ -13,6 +12,7 @@ import { checkValidRealm } from './sagas'
 import { establishingComms } from 'shared/loading/types'
 import { commsLogger } from 'shared/comms/context'
 import { realmToConnectionString, resolveCommsConnectionString } from 'shared/comms/v3/resolver'
+import { nodesFromDAO } from './nodesFromDAO'
 
 async function fetchCatalystNodes(endpoint: string | undefined) {
   if (endpoint) {
@@ -31,7 +31,7 @@ async function fetchCatalystNodes(endpoint: string | undefined) {
     }
   }
 
-  return fetchCatalystNodesFromDAO()
+  return nodesFromDAO
 }
 
 export async function fetchCatalystRealms(nodesEndpoint: string | undefined): Promise<CatalystNode[]> {
