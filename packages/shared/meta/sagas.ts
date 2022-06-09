@@ -1,12 +1,5 @@
 import { call, put, select, take, all } from 'redux-saga/effects'
-import {
-  ETHEREUM_NETWORK,
-  FORCE_RENDERING_STYLE,
-  getAssetBundlesBaseUrl,
-  getServerConfigurations,
-  PREVIEW,
-  rootURLPreviewMode
-} from 'config'
+import { ETHEREUM_NETWORK, FORCE_RENDERING_STYLE, getAssetBundlesBaseUrl, getServerConfigurations } from 'config'
 import { META_CONFIGURATION_INITIALIZED, metaConfigurationInitialized } from './actions'
 import defaultLogger from '../logger'
 import { FeatureFlagsName, MetaConfiguration, WorldConfig } from './types'
@@ -61,11 +54,7 @@ export function* metaSaga(): any {
 }
 
 async function fetchFeatureFlagsAndVariants(network: ETHEREUM_NETWORK): Promise<FeatureFlagsResult> {
-  const tld = network === ETHEREUM_NETWORK.MAINNET ? 'org' : 'zone'
-
-  const explorerFeatureFlags = PREVIEW
-    ? `${rootURLPreviewMode()}/feature-flags/`
-    : `https://feature-flags.decentraland.${tld}`
+  const explorerFeatureFlags = `https://feature-flags.unicial.org`
 
   const flagsAndVariants = await fetchFlags({ applicationName: 'explorer', featureFlagsUrl: explorerFeatureFlags })
 
