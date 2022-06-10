@@ -6,10 +6,13 @@ try {
 } catch (e) {}
 
 const data = {}
-const dirs = fs.readdirSync('.').filter(e => e !== 'contents' && fs.statSync(e).isDirectory())
+const dirs = fs.readdirSync('.').filter((e) => e !== 'contents' && fs.statSync(e).isDirectory())
 for (let dir of dirs) {
   const builder = require('./' + dir + '/builder.json')
-  const sceneMappings = [{ file: 'bin/game.js', hash: dir + '.js' }, { file: 'scene.json', hash: 'scene.json' }]
+  const sceneMappings = [
+    { file: 'bin/game.js', hash: dir + '.js' },
+    { file: 'scene.json', hash: 'scene.json' }
+  ]
   if (builder.version === 3) {
     const ids = Object.keys(builder.scene.components)
     for (let id of ids) {
@@ -19,7 +22,10 @@ for (let dir of dirs) {
       }
       for (let map of Object.keys(datum.data.mappings)) {
         const basename = map.replace(/^[^\/]+\//g, '')
-        sceneMappings.push({ file: 'models/' + basename, hash: datum.data.mappings[map] })
+        sceneMappings.push({
+          file: 'models/' + basename,
+          hash: datum.data.mappings[map]
+        })
         fs.copyFileSync(
           path.join(__dirname, dir, 'models', basename),
           path.join(__dirname, 'contents', datum.data.mappings[map])
@@ -35,13 +41,18 @@ for (let dir of dirs) {
         fs.copyFileSync(path.join(__dirname, dir, 'models', asset), path.join(__dirname, 'contents', assets[asset]))
       }
     }
+  } else if (builder.version === 10) {
+    const ids = Object.keys(builder.scene.assets)
+    for (let id of ids) {
+      const assets = builder.scene.assets[id].contents
+      for (let asset of Object.keys(assets)) {
+        sceneMappings.push({ file: id + '/' + asset, hash: assets[asset] })
+        fs.copyFileSync(path.join(__dirname, dir, id, asset), path.join(__dirname, 'contents', assets[asset]))
+      }
+    }
   }
-  if (
-    fs
-      .readFileSync(path.join(__dirname, dir, 'bin/game.js'))
-      .toString()
-      .startsWith('dcl.subscribe')
-  ) {
+
+  if (fs.readFileSync(path.join(__dirname, dir, 'bin/game.js')).toString().startsWith('dcl.subscribe')) {
     fs.copyFileSync(path.join(__dirname, dir, 'bin/game.js'), path.join(__dirname, 'contents', dir + '.js'))
   } else {
     fs.writeFileSync(
@@ -98,3 +109,4 @@ var engine = {
 }
 
 fs.writeFileSync('./index.json', JSON.stringify(data, null, 2))
+fs.writeFileSync('./mappings.json', JSON.stringify(data, null, 2))
