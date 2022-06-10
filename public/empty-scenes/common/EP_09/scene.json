@@ -1,11 +1,12 @@
 {
   "display": {
-    "title": "interactive-text",
-    "favicon": "favicon_asset"
+    "title": "EP_02",
+    "favicon": "favicon_asset",
+    "navmapThumbnail": "scene-thumbnail.png"
   },
   "owner": "",
   "contact": {
-    "name": "author-name",
+    "name": "ksato#a016",
     "email": ""
   },
   "main": "bin/game.js",
@@ -16,19 +17,18 @@
     ],
     "base": "0,0"
   },
-  "communications": {
-    "type": "webrtc",
-    "signalling": "https://signalling-01.decentraland.org"
-  },
-  "policy": {
-    "contentRating": "E",
-    "fly": true,
-    "voiceEnabled": true,
-    "blacklist": [],
-    "teleportPosition": ""
-  },
   "source": {
+    "version": 1,
     "origin": "builder",
-    "projectId": "4de4f548-e83c-47c4-8dba-72f9c8545c0e"
+    "projectId": "bf151b56-f000-429a-94dd-83655d16de53",
+    "point": {
+      "x": 0,
+      "y": 0
+    },
+    "rotation": "east",
+    "layout": {
+      "rows": 1,
+      "cols": 1
+    }
   }
 }
