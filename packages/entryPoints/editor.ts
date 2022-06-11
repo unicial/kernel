@@ -78,7 +78,7 @@ async function getSceneData(scene: SceneJsonData, baseUrl: string, mappings: any
   return {
     baseUrl: baseUrl,
     baseUrlBundles: '',
-    sceneId: '0, 0',
+    sceneId: '-33, -122',
     sceneJsonData: scene,
     mappingsResponse: {
       contents,
@@ -97,7 +97,7 @@ function getBaseCoords(scene: SceneJsonData): string {
     return `${x},${y}`
   }
 
-  return '0,0'
+  return '-33,-122'
 }
 
 function bindSceneEvents() {

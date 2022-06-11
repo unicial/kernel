@@ -147,7 +147,7 @@ function spawnPortableExperience(spawnData: StorePortableExperience): PortableEx
 
   const mainFile = spawnData.mappings.filter((m) => m.file.endsWith('game.js'))[0]?.hash
 
-  const ZERO_ZERO = parseParcelPosition('0,0')
+  const ZERO_ZERO = parseParcelPosition('-33,-122')
 
   const data: EnvironmentData<LoadablePortableExperienceScene> = {
     sceneId: spawnData.id,

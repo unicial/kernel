@@ -74,7 +74,7 @@ function* pickCatalystRealm() {
   const algorithm = createAlgorithm(config)
 
   const qs = new URLSearchParams(globalThis.location.search)
-  const currentUserParcel = parseParcelPosition(qs.get('position') || '0,0')
+  const currentUserParcel = parseParcelPosition(qs.get('position') || '-33,-122')
 
   const realm = yield call(
     candidateToRealm,
