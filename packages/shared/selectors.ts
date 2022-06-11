@@ -61,7 +61,7 @@ export function ILandToLoadableParcelSceneUpdate(land: ILand): EnvironmentData<L
     mappings,
     data: {
       id: land.sceneId,
-      basePosition: parseParcelPosition('0,0'),
+      basePosition: parseParcelPosition('-33,-122'),
       name: getSceneNameFromJsonData(land.sceneJsonData),
       parcels:
         (land.sceneJsonData &&
