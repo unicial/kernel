@@ -109,8 +109,8 @@ export function initializeUrlPositionObserver() {
       }
       gridToWorld(x, y, lastPlayerPosition)
     } else {
-      lastPlayerPosition.x = Math.round(Math.random() * 10) - 5
-      lastPlayerPosition.z = 0
+      lastPlayerPosition.x = Math.round(Math.random() * 10) - 5 - 33 // change default scene
+      lastPlayerPosition.z = 0 - 122
     }
   }
 
