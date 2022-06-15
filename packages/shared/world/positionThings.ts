@@ -5,6 +5,7 @@ import {
   EcsMathReadOnlyVector2,
   Vector2
 } from '@dcl/ecs-math'
+import { parcelLimits } from 'config'
 import { Observable } from 'mz-observable'
 import { ILand } from 'shared/types'
 import { InstancedSpawnPoint } from '../types'
@@ -109,8 +110,8 @@ export function initializeUrlPositionObserver() {
       }
       gridToWorld(x, y, lastPlayerPosition)
     } else {
-      lastPlayerPosition.x = Math.round(Math.random() * 10) - 5 - 33 // change default scene
-      lastPlayerPosition.z = 0 - 122
+      lastPlayerPosition.x = Math.round(Math.random() * 10) - 5 - parcelLimits.unicialPlazaX * parcelLimits.parcelSize // change default scene
+      lastPlayerPosition.z = 0 - parcelLimits.unicialPlazaY * parcelLimits.parcelSize
     }
   }
 
