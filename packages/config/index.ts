@@ -30,7 +30,7 @@ export namespace parcelLimits {
   export const geometries = 200
 
   // Default Plaza coordinate
-  export const unicialPlazaX = -33
+  export const unicialPlazaX = -32
   export const unicialPlazaY = -122
 
   export const parcelSize = 16 /* meters */
