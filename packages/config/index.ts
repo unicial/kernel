@@ -31,7 +31,7 @@ export namespace parcelLimits {
 
   // Default Plaza coordinate
   export const unicialPlazaX = -32
-  export const unicialPlazaY = -122
+  export const unicialPlazaY = -120
 
   export const parcelSize = 16 /* meters */
   export const halfParcelSize = parcelSize / 2 /* meters */
