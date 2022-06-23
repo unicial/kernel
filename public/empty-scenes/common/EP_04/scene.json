@@ -1,26 +1,24 @@
 {
   "display": {
-    "title": "EP_02",
+    "title": "Empty Parcel",
     "favicon": "favicon_asset",
     "navmapThumbnail": "scene-thumbnail.png"
   },
   "owner": "",
   "contact": {
-    "name": "ksato#a016",
-    "email": ""
+    "name": "Unicial",
+    "email": "hello@unicial.org"
   },
   "main": "bin/game.js",
   "tags": [],
   "scene": {
-    "parcels": [
-      "0,0"
-    ],
+    "parcels": ["0,0"],
     "base": "0,0"
   },
   "source": {
     "version": 1,
     "origin": "builder",
-    "projectId": "bf151b56-f000-429a-94dd-83655d16de53",
+    "projectId": "add7d16e-ff03-4c0e-82c2-3ff338423eac",
     "point": {
       "x": 0,
       "y": 0
